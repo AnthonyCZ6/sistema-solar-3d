@@ -2,6 +2,8 @@
 
 Web interactiva en 3D del sistema solar, a escala didáctica y con información de cada cuerpo celeste, para estudiantes de cualquier nivel.
 
+**Ver la web:** https://anthonycz6.github.io/sistema-solar-3d/
+
 **Estado:** hito 1 terminado (sistema solar explorable). Hito 2 (fichas informativas) implementado; falta la revisión científica de las fichas.
 
 ## Qué se puede hacer
@@ -39,7 +41,7 @@ npm run test:e2e       # pruebas en el navegador (Playwright, escritorio y celul
 
 ### Integración continua
 
-Cada push a `main` o a una rama `feat/**` corre la verificación completa en una VM de GitHub Actions (Ubuntu): tipos, pruebas unitarias con cobertura, build y pruebas E2E. Si algo falla, las capturas y trazas de Playwright quedan como artefacto `resultados-playwright` durante 7 días. Ver [`.github/workflows/ci.yml`](.github/workflows/ci.yml).
+Cada push a `main` o a una rama `feat/**` corre la verificación completa en una VM de GitHub Actions (Ubuntu): tipos, pruebas unitarias con cobertura, build y pruebas E2E. Si algo falla, las capturas y trazas de Playwright quedan como artefacto `resultados-playwright` durante 7 días. En `main`, si todo pasa, la web se publica en GitHub Pages. Ver [`.github/workflows/ci.yml`](.github/workflows/ci.yml).
 
 ## Estructura
 

@@ -1,5 +1,4 @@
 import { Vector3, type Object3D, type PerspectiveCamera } from 'three'
-import type { OrbitControls } from 'three/addons/controls/OrbitControls.js'
 import {
   easeInOutCubic,
   focusDistance,
@@ -7,12 +6,21 @@ import {
   overviewCameraPosition,
 } from '../core/focus'
 
-const TRANSITION_SECONDS = 1.5
+export const TRANSITION_SECONDS = 1.5
+/** Cuánto más lejos que la vista general se puede alejar el estudiante. */
+export const MAX_ZOOM_OUT_FACTOR = 1.5
 /** Al enfocar, la cámara mira al cuerpo un poco desde arriba. */
 const MIN_FOCUS_ELEVATION = 0.3
-/** Cuánto más lejos que la vista general se puede alejar el estudiante. */
-const MAX_ZOOM_OUT_FACTOR = 1.5
 const FALLBACK_FOCUS_DIRECTION = new Vector3(0, 1, 1).normalize()
+
+/** Lo que el rig usa de OrbitControls; así se puede probar sin navegador. */
+export interface CameraControls {
+  readonly target: Vector3
+  minDistance: number
+  maxDistance: number
+  enabled: boolean
+  update(): unknown
+}
 
 export interface FocusTarget {
   readonly object: Object3D
@@ -48,7 +56,7 @@ interface Transition {
  */
 export function createCameraRig(
   camera: PerspectiveCamera,
-  controls: OrbitControls,
+  controls: CameraControls,
   options: CameraRigOptions,
 ): CameraRig {
   const duration = options.reducedMotion ? 0 : TRANSITION_SECONDS

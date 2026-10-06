@@ -15,11 +15,13 @@ import {
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
 import { BODIES, PLANETS, SUN, isBodyId, type BodyId } from '../core/bodies'
 import { minZoomDistance, overviewDistance } from '../core/focus'
+import { fixedPixelSpriteScale } from '../core/marker'
 import { initialOrbitalAngle, orbitalAngle, orbitalPosition, spinAngle } from '../core/orbit'
 import { displayExtent, displayOrbitRadius } from '../core/scale'
 import { createBodyObject, type BodyObject } from './bodyMeshes'
 import { createCameraRig, type CameraRig } from './cameraFocus'
 import { createOrbitLine } from './orbitLines'
+import { MARKER_SIZE_PX } from './planetMarker'
 
 const FOV_DEG = 50
 const NEAR_PLANE = 0.1
@@ -218,6 +220,8 @@ export function createSolarSystem(
     camera.far = distance * FAR_PLANE_FACTOR
     camera.updateProjectionMatrix()
     rig.setOverviewDistance(distance)
+    const markerScale = fixedPixelSpriteScale(MARKER_SIZE_PX, window.innerHeight, FOV_DEG)
+    for (const { marker } of objects) marker?.scale.setScalar(markerScale)
   }
   window.addEventListener('resize', fitToViewport)
   fitToViewport()

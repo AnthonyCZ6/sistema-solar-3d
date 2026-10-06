@@ -9,6 +9,7 @@ Web interactiva en 3D del sistema solar, a escala didáctica y con información 
 - Ver el Sol y los 8 planetas girando en sus órbitas y sobre su propio eje.
 - Girar la vista, acercarla y alejarla con el mouse, el dedo o el touchpad.
 - Tocar un planeta (o elegirlo en el menú) para que la cámara viaje hacia él y lo siga en su órbita.
+- Cada planeta lleva un aro de su color de tamaño fijo en pantalla, para verlo y tocarlo aunque de lejos mida 1 o 2 píxeles.
 - Volver a la vista completa con **Ver todo**.
 - El menú se puede usar solo con el teclado.
 
@@ -29,7 +30,7 @@ npm run preview        # servir el build de producción
 
 npm run typecheck      # revisar tipos de TypeScript
 npm test               # pruebas unitarias (Vitest)
-npm run test:coverage  # pruebas unitarias con cobertura (mínimo 80 % en src/core/)
+npm run test:coverage  # pruebas unitarias con cobertura (mínimo 80 % en core, ui y la cámara)
 npx playwright install chromium   # solo la primera vez, antes de las pruebas E2E
 npm run test:e2e       # pruebas en el navegador (Playwright, escritorio y celular)
 ```
@@ -38,9 +39,9 @@ npm run test:e2e       # pruebas en el navegador (Playwright, escritorio y celul
 
 | Carpeta | Contenido |
 |---|---|
-| `src/core/` | Lógica pura con pruebas: datos de los cuerpos, escala didáctica, órbitas y cálculos de cámara |
-| `src/scene/` | Escena 3D con Three.js: mallas, órbitas, cámara y animación |
-| `src/ui/` | Menú de cuerpos y estados de la página |
+| `src/core/` | Lógica pura con pruebas: datos de los cuerpos, escala didáctica, órbitas, cámara y marcadores |
+| `src/scene/` | Escena 3D con Three.js: mallas, órbitas, marcadores, cámara y animación |
+| `src/ui/` | Menú de cuerpos y estados de la página (con pruebas en DOM simulado) |
 | `e2e/` | Pruebas de extremo a extremo con Playwright |
 | `public/textures/` | Texturas de 2K de los planetas y del fondo de estrellas |
 

@@ -10,8 +10,9 @@ export default defineConfig({
     environment: 'node',
     coverage: {
       provider: 'v8',
-      include: ['src/core/**/*.ts'],
-      exclude: ['src/core/**/*.test.ts'],
+      // El resto de src/scene necesita WebGL real: lo cubren las pruebas E2E.
+      include: ['src/core/**/*.ts', 'src/ui/**/*.ts', 'src/scene/cameraFocus.ts'],
+      exclude: ['src/**/*.test.ts'],
       thresholds: { lines: 80, functions: 80, branches: 80, statements: 80 },
     },
   },

@@ -8,10 +8,13 @@ import {
   SRGBColorSpace,
   SphereGeometry,
   Vector3,
+  type Object3D,
+  type Sprite,
   type TextureLoader,
 } from 'three'
 import type { CelestialBody, RingData } from '../core/bodies'
 import { displayExtent, displayRadius } from '../core/scale'
+import { createPlanetMarker } from './planetMarker'
 
 const SPHERE_SEGMENTS = 64
 const RING_SEGMENTS = 128
@@ -26,8 +29,10 @@ export interface BodyObject {
   readonly anchor: Group
   /** Gira sobre el eje inclinado del cuerpo. */
   readonly spinner: Mesh
-  /** Mallas que responden a clic o toque. */
-  readonly pickables: readonly Mesh[]
+  /** Objetos que responden a clic o toque. */
+  readonly pickables: readonly Object3D[]
+  /** Aro de tamaño fijo en pantalla (solo planetas); su escala se ajusta al alto de la pantalla. */
+  readonly marker: Sprite | null
   /** Radio visible, incluyendo anillos. */
   readonly extent: number
 }
@@ -121,14 +126,17 @@ export function createBodyObject(
   tilt.add(spinner)
   if (ring) tilt.add(ring)
 
+  const marker = body.kind === 'planeta' ? createPlanetMarker(body) : null
   const anchor = new Group()
   anchor.add(tilt)
+  if (marker) anchor.add(marker)
 
   return {
     body,
     anchor,
     spinner,
-    pickables: ring ? [spinner, ring] : [spinner],
+    pickables: [spinner, ring, marker].filter((object) => object !== null),
+    marker,
     extent: displayExtent(body),
   }
 }

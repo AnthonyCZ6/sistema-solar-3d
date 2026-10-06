@@ -175,4 +175,9 @@ npm run test:e2e         # Playwright sobre vite preview
 - Pruebas unitarias: 55 en verde; cobertura de `src/core/`: 97 % instrucciones, 90 % ramas, 95.7 % funciones, 100 % líneas.
 - E2E: 16 en verde (8 escenarios × escritorio y celular), incluido clic en la escena, celular horizontal, textura que falla y navegador sin WebGL.
 - Revisión de código: sin CRITICAL ni HIGH. Se corrigieron los 5 MEDIUM (menú en celular horizontal, "Ver todo" fuera de vista, reajuste al rotar la pantalla, pérdida del contexto WebGL, errores en el bucle de animación) y varios LOW.
-- Pendiente para hitos siguientes: pruebas unitarias de `scene/cameraFocus.ts` y `ui/bodyMenu.ts` (hoy cubiertas solo por E2E); en la vista general los planetas interiores se ven muy pequeños.
+
+## Pendientes cerrados (2026-10-05)
+- Pruebas unitarias de `scene/cameraFocus.ts` (11), `ui/bodyMenu.ts` (8) y `ui/notices.ts` (3). El rig de cámara ahora depende de una interfaz mínima (`CameraControls`) y se prueba sin navegador; el menú se prueba con happy-dom. La cobertura obligatoria incluye `src/core/`, `src/ui/` y `scene/cameraFocus.ts`.
+- Planetas interiores visibles en la vista general: cada planeta tiene un aro de su color de 28 px fijos en pantalla (`core/marker.ts` + `scene/planetMarker.ts`), que además sirve de zona para tocarlo. Al acercarse, la esfera lo tapa.
+- Totales: 82 pruebas unitarias (cobertura 98.9 % instrucciones, 95.2 % ramas) y 16 E2E en verde. Revisión de código: aprobada, sin CRITICAL/HIGH/MEDIUM.
+- Sin prueba E2E directa del toque sobre un marcador: la posición en pantalla cambia con el tiempo de la simulación. Se verificó en capturas de pantalla.

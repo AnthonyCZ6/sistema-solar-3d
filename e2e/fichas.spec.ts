@@ -32,6 +32,24 @@ async function waitUntilLoaded(page: Page): Promise<void> {
   })
 }
 
+/**
+ * Para que una captura muestre el cuerpo ya enfocado: con "reducir movimiento"
+ * el viaje de cámara es instantáneo (hay que activarlo antes de cargar la página).
+ */
+async function enableInstantCamera(page: Page): Promise<void> {
+  await page.emulateMedia({ reducedMotion: 'reduce' })
+}
+
+/** Espera dos cuadros: uno para mover la cámara y otro para dibujar la escena. */
+async function waitForRenderedFrames(page: Page): Promise<void> {
+  await page.evaluate(
+    () =>
+      new Promise<void>((resolve) => {
+        requestAnimationFrame(() => requestAnimationFrame(() => resolve()))
+      }),
+  )
+}
+
 async function overlaps(first: Locator, second: Locator): Promise<boolean> {
   const [a, b] = await Promise.all([first.boundingBox(), second.boundingBox()])
   if (!a || !b) return false
@@ -132,12 +150,15 @@ test.describe('Fichas informativas', () => {
       if (message.type() === 'error') errors.push(message.text())
     })
     page.on('pageerror', (error) => errors.push(error.message))
+    await enableInstantCamera(page)
     await page.goto('/')
     await waitUntilLoaded(page)
 
     for (const name of BODY_NAMES) {
       await bodyButton(page, name).click()
       await expect(factSheet(page).getByRole('heading', { level: 2 })).toHaveText(name)
+      // Evidencia para la revisión científica: cada captura muestra su cuerpo y su ficha.
+      await waitForRenderedFrames(page)
       await page.screenshot({ path: test.info().outputPath(`ficha-${name}.png`) })
     }
     expect(errors).toEqual([])
@@ -153,11 +174,13 @@ test.describe('Fichas informativas', () => {
 
   test('en un celular horizontal la ficha tampoco tapa nada', async ({ page }) => {
     await page.setViewportSize({ width: 740, height: 360 })
+    await enableInstantCamera(page)
     await page.goto('/')
 
     await bodyButton(page, 'Júpiter').click()
 
     await expectSheetLeavesUiVisible(page)
+    await waitForRenderedFrames(page)
     await page.screenshot({ path: test.info().outputPath('ficha-horizontal.png') })
   })
 })

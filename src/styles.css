@@ -1,0 +1,236 @@
+:root {
+  --fondo: #05070d;
+  --panel: rgba(10, 14, 26, 0.75);
+  --panel-solido: #0a0e1a;
+  --borde: rgba(255, 255, 255, 0.14);
+  --texto: #e8ecf5;
+  --texto-suave: #b4bdd0;
+  --acento: #ffcc33;
+  --acento-suave: rgba(255, 204, 51, 0.14);
+  --hover: rgba(255, 255, 255, 0.08);
+  --radio: 10px;
+  --margen: 16px;
+  color-scheme: dark;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  height: 100%;
+}
+
+body {
+  background: var(--fondo);
+  color: var(--texto);
+  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  overflow: hidden;
+}
+
+#escena {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+  touch-action: none;
+}
+
+.encabezado {
+  position: fixed;
+  top: var(--margen);
+  left: var(--margen);
+  right: var(--margen);
+  pointer-events: none;
+}
+
+.encabezado h1 {
+  margin: 0;
+  font-size: 1.15rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+.estado-enfoque {
+  margin: 4px 0 0;
+  font-size: 0.95rem;
+  color: var(--acento);
+}
+
+/* Menú de cuerpos: columna a la izquierda en pantallas anchas. */
+.menu {
+  position: fixed;
+  left: var(--margen);
+  top: 50%;
+  transform: translateY(-50%);
+  max-height: calc(100dvh - 2 * var(--margen));
+  overflow-y: auto;
+  padding: 8px;
+  background: var(--panel);
+  border: 1px solid var(--borde);
+  border-radius: var(--radio);
+  backdrop-filter: blur(6px);
+}
+
+.menu-lista {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.boton-cuerpo,
+.boton-ver-todo {
+  font: inherit;
+  color: var(--texto);
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  padding: 8px 12px;
+  min-height: 44px;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  text-align: left;
+}
+
+.boton-cuerpo:hover,
+.boton-ver-todo:hover {
+  background: var(--hover);
+}
+
+.boton-cuerpo[aria-pressed='true'] {
+  border-color: var(--acento);
+  background: var(--acento-suave);
+}
+
+.boton-ver-todo {
+  margin-top: 6px;
+  justify-content: center;
+  border-color: var(--borde);
+}
+
+button:focus-visible {
+  outline: 2px solid var(--acento);
+  outline-offset: 2px;
+}
+
+.muestra {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  flex: none;
+}
+
+.aviso-escala {
+  position: fixed;
+  right: var(--margen);
+  bottom: var(--margen);
+  margin: 0;
+  max-width: 260px;
+  padding: 8px 12px;
+  font-size: 0.8rem;
+  color: var(--texto-suave);
+  background: var(--panel);
+  border: 1px solid var(--borde);
+  border-radius: var(--radio);
+  pointer-events: none;
+}
+
+.cargando {
+  display: none;
+  position: fixed;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  margin: 0;
+  padding: 10px 16px;
+  background: var(--panel);
+  border: 1px solid var(--borde);
+  border-radius: 999px;
+  pointer-events: none;
+}
+
+.mensaje {
+  display: none;
+  position: fixed;
+  inset: 0;
+  margin: auto;
+  width: calc(100% - 2 * var(--margen));
+  max-width: 480px;
+  height: fit-content;
+  padding: 24px;
+  background: var(--panel);
+  border: 1px solid var(--borde);
+  border-radius: var(--radio);
+  line-height: 1.5;
+}
+
+.mensaje h2 {
+  margin-top: 0;
+}
+
+.sin-js {
+  display: block;
+}
+
+/* Estados de la página (atributo data-estado del body). */
+body[data-estado='cargando'] .cargando,
+body[data-estado='sin-webgl'] .sin-webgl,
+body[data-estado='error'] .error-3d {
+  display: block;
+}
+
+body:is([data-estado='sin-webgl'], [data-estado='error']) :is(#escena, .menu, .aviso-escala, .estado-enfoque) {
+  display: none;
+}
+
+/* Celular (vertical u horizontal): el menú pasa a una fila deslizable abajo y el aviso sube. */
+@media (max-width: 640px), (max-height: 520px) {
+  .menu {
+    top: auto;
+    bottom: var(--margen);
+    right: var(--margen);
+    transform: none;
+    max-height: none;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    overflow-x: auto;
+    overflow-y: hidden;
+  }
+
+  .menu-lista {
+    flex-direction: row;
+  }
+
+  .boton-cuerpo,
+  .boton-ver-todo {
+    width: auto;
+    white-space: nowrap;
+  }
+
+  /* "Ver todo" es la única forma de volver a la vista general: siempre a la vista. */
+  .boton-ver-todo {
+    position: sticky;
+    right: 0;
+    margin-top: 0;
+    flex: none;
+    background: var(--panel-solido);
+  }
+
+  .aviso-escala {
+    top: 76px;
+    bottom: auto;
+    left: var(--margen);
+    right: auto;
+    max-width: none;
+  }
+}

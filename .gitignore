@@ -3,6 +3,11 @@ node_modules/
 dist/
 build/
 
+# Resultados de pruebas
+coverage/
+test-results/
+playwright-report/
+
 # Variables de entorno
 .env
 .env.*

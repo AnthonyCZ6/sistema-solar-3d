@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="Explora el sistema solar en 3D: el Sol y los 8 planetas en órbita." />
+    <meta name="theme-color" content="#05070d" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <title>Sistema Solar 3D</title>
+  </head>
+  <body data-estado="cargando">
+    <canvas
+      id="escena"
+      role="img"
+      aria-label="Vista 3D del sistema solar. Arrastra para girar, usa la rueda o pellizca para acercar y toca un planeta para enfocarlo."
+    ></canvas>
+
+    <header class="encabezado">
+      <h1>Sistema Solar 3D</h1>
+      <p id="estado-enfoque" class="estado-enfoque" aria-live="polite">Vista general</p>
+    </header>
+
+    <nav id="menu-cuerpos" class="menu" aria-label="Cuerpos celestes"></nav>
+
+    <p class="aviso-escala">Escala didáctica: tamaños y distancias no son reales.</p>
+
+    <p class="cargando" role="status">Cargando texturas…</p>
+
+    <section class="mensaje sin-webgl" role="alert" aria-labelledby="sin-webgl-titulo">
+      <h2 id="sin-webgl-titulo">Tu navegador no puede mostrar 3D</h2>
+      <p>
+        Esta página necesita WebGL 2. Prueba con una versión reciente de Chrome, Edge, Firefox o
+        Safari, o activa la aceleración por hardware en la configuración del navegador.
+      </p>
+    </section>
+
+    <section class="mensaje error-3d" role="alert" aria-labelledby="error-3d-titulo">
+      <h2 id="error-3d-titulo">No se pudo mostrar el sistema solar</h2>
+      <p>Ocurrió un problema con la vista 3D. Recarga la página para intentarlo de nuevo.</p>
+    </section>
+
+    <noscript>
+      <p class="mensaje sin-js">Activa JavaScript para ver el sistema solar en 3D.</p>
+    </noscript>
+
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

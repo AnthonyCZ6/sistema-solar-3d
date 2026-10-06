@@ -52,7 +52,7 @@ Sabremos que acertamos cuando **TBD: falta definir el resultado medible.** Candi
 
 | # | Milestone | Outcome | Status | Plan |
 |---|---|---|---|---|
-| 1 | Sistema solar explorable | Un estudiante abre la web y navega en 3D por el Sol y los 8 planetas en órbita | pending | — |
+| 1 | Sistema solar explorable | Un estudiante abre la web y navega en 3D por el Sol y los 8 planetas en órbita | complete | `.claude/plans/sistema-solar-explorable.plan.md` |
 | 2 | Fichas informativas | Al seleccionar cualquier cuerpo, el estudiante ve su información | pending | — |
 | 3 | Calidad adaptativa | La web es fluida en gama baja y se ve a máxima resolución en gama alta, sin configurar nada | pending | — |
 | 4 | Prueba piloto | Estudiantes reales la usan y se mide la hipótesis | pending | — |

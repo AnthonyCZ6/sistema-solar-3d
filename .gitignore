@@ -1,0 +1,21 @@
+# Dependencias y builds
+node_modules/
+dist/
+build/
+
+# Variables de entorno
+.env
+.env.*
+
+# Sistema operativo
+Thumbs.db
+Desktop.ini
+.DS_Store
+
+# Editores
+.vscode/
+.idea/
+*.swp
+
+# Configuración local de Claude Code (los PRD y planes sí se versionan)
+.claude/settings.local.json

@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import {
+  FOCUS_DISTANCE_FACTOR,
   NO_INSET,
   OVERVIEW_ELEVATION_DEG,
   easeInOutCubic,
@@ -9,6 +10,7 @@ import {
   overviewDistance,
   panelInset,
   viewOffsetForInset,
+  zoomForInset,
 } from './focus'
 
 const FOV_DEG = 50
@@ -143,5 +145,51 @@ describe('panelInset', () => {
   it('un panel fuera de la pantalla no da medidas negativas', () => {
     const rect = { left: 1400, top: 16, width: 340, height: 700 }
     expect(panelInset(rect, { width: 1280, height: 800 })).toEqual({ right: 0, bottom: 0 })
+  })
+})
+
+describe('zoomForInset', () => {
+  /** Alto en píxeles del cuerpo enfocado (a la distancia de enfoque) con un zoom dado. */
+  function focusedBodyPx(viewportHeight: number, zoom: number): number {
+    return (viewportHeight * zoom) / (FOCUS_DISTANCE_FACTOR * HALF_FOV_TAN)
+  }
+
+  const cases = [
+    { name: 'celular vertical con hoja inferior', viewport: { width: 360, height: 640 }, inset: { right: 0, bottom: 374 } },
+    { name: 'ventana angosta con columna', viewport: { width: 641, height: 600 }, inset: { right: 356, bottom: 0 } },
+    { name: 'tableta vertical con columna', viewport: { width: 768, height: 1024 }, inset: { right: 356, bottom: 0 } },
+    { name: 'escritorio con columna', viewport: { width: 1280, height: 800 }, inset: { right: 356, bottom: 0 } },
+    { name: 'celular horizontal con columna', viewport: { width: 740, height: 360 }, inset: { right: 370, bottom: 0 } },
+  ]
+
+  it('sin panel no cambia nada', () => {
+    expect(zoomForInset(NO_INSET, { width: 360, height: 640 })).toBe(1)
+  })
+
+  it('nunca acerca más que sin panel', () => {
+    for (const { name, viewport, inset } of cases) {
+      expect(zoomForInset(inset, viewport), name).toBeLessThanOrEqual(1)
+    }
+  })
+
+  it('el cuerpo enfocado cabe en la zona que no tapa el panel', () => {
+    for (const { name, viewport, inset } of cases) {
+      const freeSide = Math.min(viewport.width - inset.right, viewport.height - inset.bottom)
+      const bodyPx = focusedBodyPx(viewport.height, zoomForInset(inset, viewport))
+      expect(bodyPx, name).toBeLessThan(freeSide)
+    }
+  })
+
+  it('si sobra espacio (escritorio ancho), no aleja la vista', () => {
+    expect(zoomForInset({ right: 356, bottom: 0 }, { width: 1280, height: 800 })).toBe(1)
+  })
+
+  it('aunque el panel tape casi todo, el zoom no baja de un mínimo', () => {
+    expect(zoomForInset({ right: 0, bottom: 639 }, { width: 360, height: 640 })).toBeGreaterThan(0.1)
+  })
+
+  it('rechaza medidas negativas y pantallas sin tamaño', () => {
+    expect(() => zoomForInset({ right: -1, bottom: 0 }, { width: 360, height: 640 })).toThrow(RangeError)
+    expect(() => zoomForInset({ right: 10, bottom: 0 }, { width: 360, height: 0 })).toThrow(RangeError)
   })
 })

@@ -85,6 +85,23 @@ export function viewOffsetForInset(inset: ViewInset): { x: number; y: number } {
   return { x: inset.right / 2, y: inset.bottom / 2 }
 }
 
+/** Aunque un panel tape casi toda la pantalla, la escena no se aleja más que esto. */
+export const MIN_INSET_ZOOM = 0.25
+
+/**
+ * Zoom de la cámara (`camera.zoom`) para que el cuerpo enfocado ocupe de la zona libre
+ * lo mismo que ocupa del alto de la pantalla sin panel. Nunca acerca: como mucho vale 1.
+ */
+export function zoomForInset(inset: ViewInset, viewport: Viewport): number {
+  assertNonNegative(inset.right, 'El ancho tapado')
+  assertNonNegative(inset.bottom, 'El alto tapado')
+  assertPositive(viewport.width, 'El ancho de la pantalla')
+  assertPositive(viewport.height, 'El alto de la pantalla')
+  if (inset.right === 0 && inset.bottom === 0) return 1
+  const freeSide = Math.min(viewport.width - inset.right, viewport.height - inset.bottom)
+  return Math.min(1, Math.max(MIN_INSET_ZOOM, freeSide / viewport.height))
+}
+
 /**
  * Qué tapa un panel: si deja más espacio libre a su izquierda es una columna
  * a la derecha (escritorio o celular horizontal); si deja más arriba, una hoja inferior.

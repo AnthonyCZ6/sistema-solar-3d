@@ -11,6 +11,7 @@ import {
   Vector2,
   WebGLRenderer,
   type Object3D,
+  type Sprite,
 } from 'three'
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
 import { BODIES, PLANETS, SUN, isBodyId, type BodyId } from '../core/bodies'
@@ -19,6 +20,7 @@ import {
   minZoomDistance,
   overviewDistance,
   viewOffsetForInset,
+  zoomForInset,
   type ViewInset,
 } from '../core/focus'
 import { fixedPixelSpriteScale } from '../core/marker'
@@ -137,15 +139,24 @@ function enablePicking(
   })
 }
 
-/** Desplaza el encuadre para que el centro de la vista quede fuera del panel. */
-function applyViewInset(camera: PerspectiveCamera, inset: ViewInset): void {
-  const { x, y } = viewOffsetForInset(inset)
-  if (x === 0 && y === 0) {
-    camera.clearViewOffset()
-    return
-  }
+/**
+ * Encuadra la escena en la parte de la pantalla que no tapa el panel: centra la vista
+ * en esa zona y aleja con `camera.zoom` lo justo para que el cuerpo enfocado quepa.
+ */
+function applyViewInset(
+  camera: PerspectiveCamera,
+  markers: readonly Sprite[],
+  inset: ViewInset,
+): void {
   const { innerWidth: width, innerHeight: height } = window
-  camera.setViewOffset(width, height, x, y, width, height)
+  camera.zoom = zoomForInset(inset, { width, height })
+  const { x, y } = viewOffsetForInset(inset)
+  // Ambas llamadas recalculan la proyección, ya con el zoom nuevo.
+  if (x === 0 && y === 0) camera.clearViewOffset()
+  else camera.setViewOffset(width, height, x, y, width, height)
+  // Con `sizeAttenuation: false` el zoom también achica los aros: se compensa para que midan lo mismo.
+  const markerScale = fixedPixelSpriteScale(MARKER_SIZE_PX, height, FOV_DEG) / camera.zoom
+  for (const marker of markers) marker.scale.setScalar(markerScale)
 }
 
 function createView(
@@ -231,10 +242,11 @@ export function createSolarSystem(
     reducedMotion: window.matchMedia('(prefers-reduced-motion: reduce)').matches,
   })
 
+  const markers = objects.flatMap((object) => (object.marker ? [object.marker] : []))
   let viewInset = NO_INSET
   const view = createView(objects, rig, events, (inset) => {
     viewInset = inset
-    applyViewInset(camera, viewInset)
+    applyViewInset(camera, markers, viewInset)
   })
   enablePicking(canvas, camera, objects.flatMap((object) => object.pickables), (id) => view.focusOn(id))
 
@@ -243,12 +255,9 @@ export function createSolarSystem(
     camera.aspect = window.innerWidth / window.innerHeight
     const distance = overviewDistance(outerRadius, camera.aspect, FOV_DEG)
     camera.far = distance * FAR_PLANE_FACTOR
-    camera.updateProjectionMatrix()
-    // El desplazamiento se mide en píxeles: hay que recalcularlo con el tamaño nuevo.
-    applyViewInset(camera, viewInset)
+    // El desplazamiento, el zoom y los aros dependen del tamaño: se recalculan con el nuevo.
+    applyViewInset(camera, markers, viewInset)
     rig.setOverviewDistance(distance)
-    const markerScale = fixedPixelSpriteScale(MARKER_SIZE_PX, window.innerHeight, FOV_DEG)
-    for (const { marker } of objects) marker?.scale.setScalar(markerScale)
   }
   window.addEventListener('resize', fitToViewport)
   fitToViewport()

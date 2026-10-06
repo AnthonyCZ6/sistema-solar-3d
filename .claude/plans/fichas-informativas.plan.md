@@ -161,12 +161,21 @@ npm run test:e2e         # Playwright, escritorio y celular
 | `Intl` formatea distinto en algún navegador | Baja | Locale fijo `es-419`; las pruebas unitarias y la E2E comprueban el texto formateado |
 
 ## Acceptance
-- [ ] Al elegir cualquiera de los 9 cuerpos (menú, clic o toque) se abre su ficha
-- [ ] La ficha se cierra con el botón, con Escape y con "Ver todo", y se reabre al pulsar el cuerpo otra vez
-- [ ] La ficha no tapa el cuerpo enfocado, el menú, "Ver todo" ni el aviso de escala, en escritorio y celular
-- [ ] Cada ficha muestra sus fuentes y la fecha de consulta
-- [ ] All tasks complete
-- [ ] Validation passes (typecheck, cobertura ≥ 80 %, build, E2E)
-- [ ] Patterns mirrored, not reinvented
-- [ ] Sin hallazgos CRITICAL o HIGH en la revisión de código
+- [x] Al elegir cualquiera de los 9 cuerpos (menú, clic o toque) se abre su ficha
+- [x] La ficha se cierra con el botón, con Escape y con "Ver todo", y se reabre al pulsar el cuerpo otra vez
+- [x] La ficha no tapa el cuerpo enfocado, el menú, "Ver todo" ni el aviso de escala, en escritorio y celular
+- [x] Cada ficha muestra sus fuentes y la fecha de consulta
+- [x] All tasks complete
+- [x] Validation passes (typecheck, cobertura ≥ 80 %, build, E2E)
+- [x] Patterns mirrored, not reinvented
+- [x] Sin hallazgos CRITICAL o HIGH en la revisión de código
 - [ ] Revisión científica de las 9 fichas (la hacen tú o un docente; no se puede automatizar)
+
+## Resultado (2026-10-06)
+- Verificación en una VM de GitHub Actions (Ubuntu), no en el equipo local, con `.github/workflows/ci.yml`. Última ejecución: https://github.com/AnthonyCZ6/sistema-solar-3d/actions/runs/37538257292
+- Pruebas unitarias: 169 en verde. Cobertura: 99.2 % de instrucciones, 96.4 % de ramas, 98.9 % de funciones y 100 % de líneas.
+- E2E: 34 en verde al primer intento (17 escenarios × escritorio y celular), sin reintentos.
+- En el equipo local, 5 E2E agotaron el tiempo con 3D por software y varias pruebas en paralelo. En la VM pasaron todas, así que se atribuye a falta de recursos locales; no se volvió a probar en local.
+- Datos verificados contra las páginas de la NASA. Las lunas conocidas salen de NASA Science (Júpiter 115, Saturno 293, Urano 29, Neptuno 16, a septiembre de 2026), porque la Fact Sheet de marzo de 2025 estaba desactualizada. Se descartaron datos curiosos que no figuraban en las páginas consultadas.
+- Revisión de código: aprobada, sin CRITICAL ni HIGH. Se corrigió el MEDIUM: el cuerpo enfocado no cabía en la zona libre en celular y en ventanas angostas, y ahora `zoomForInset` aleja la vista lo justo. El LOW (anunciar la ficha a lectores de pantalla) queda pendiente como mejora opcional.
+- Capturas de las 9 fichas para la revisión científica: artefacto `resultados-playwright` de la ejecución anterior (se guarda 7 días).

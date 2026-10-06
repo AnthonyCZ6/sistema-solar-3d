@@ -8,6 +8,8 @@ export interface BodyMenuHandlers {
 export interface BodyMenu {
   /** Marca el cuerpo enfocado (null = vista general) y actualiza el indicador. */
   setActive(id: BodyId | null): void
+  /** Lleva el foco al botón del cuerpo enfocado (o a "Ver todo"), por ejemplo al cerrar la ficha. */
+  focusActive(): void
 }
 
 const OVERVIEW_STATUS = 'Vista general'
@@ -61,7 +63,9 @@ export function createBodyMenu(
       return item
     }),
   )
-  nav.replaceChildren(list, createOverviewButton(handlers.onOverview))
+  const overviewButton = createOverviewButton(handlers.onOverview)
+  nav.replaceChildren(list, overviewButton)
+  let activeButton: HTMLButtonElement | null = null
 
   return {
     setActive(id) {
@@ -69,7 +73,12 @@ export function createBodyMenu(
         button.setAttribute('aria-pressed', String(body.id === id))
       }
       const active = entries.find(({ body }) => body.id === id)
+      activeButton = active?.button ?? null
       status.textContent = active ? `Enfocando: ${active.body.name}` : OVERVIEW_STATUS
+    },
+    focusActive() {
+      const target = activeButton ?? overviewButton
+      target.focus()
     },
   }
 }

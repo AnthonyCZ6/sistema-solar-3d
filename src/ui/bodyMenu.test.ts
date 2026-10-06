@@ -89,6 +89,20 @@ describe('createBodyMenu', () => {
     expect(status.textContent).toBe('Vista general')
   })
 
+  it('focusActive lleva el foco al cuerpo enfocado, o a "Ver todo" en la vista general', () => {
+    const { nav, menu } = setup()
+    document.body.append(nav)
+
+    menu.setActive('marte')
+    menu.focusActive()
+    expect(document.activeElement).toBe(buttonFor(nav, 'marte'))
+
+    menu.setActive(null)
+    menu.focusActive()
+    expect(document.activeElement).toBe(nav.querySelector('.boton-ver-todo'))
+    nav.remove()
+  })
+
   it('reemplaza lo que hubiera antes dentro del menú', () => {
     const nav = document.createElement('nav')
     const previous = document.createElement('span')

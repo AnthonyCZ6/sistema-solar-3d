@@ -49,6 +49,56 @@ export function overviewCameraPosition(distance: number): Point3 {
   return { x: 0, y: distance * Math.sin(elevation), z: distance * Math.cos(elevation) }
 }
 
+/** Píxeles de la pantalla que tapa un panel, a la derecha o abajo. */
+export interface ViewInset {
+  readonly right: number
+  readonly bottom: number
+}
+
+export const NO_INSET: ViewInset = Object.freeze({ right: 0, bottom: 0 })
+
+export interface ScreenRect {
+  readonly left: number
+  readonly top: number
+  readonly width: number
+  readonly height: number
+}
+
+export interface Viewport {
+  readonly width: number
+  readonly height: number
+}
+
+function assertNonNegative(value: number, label: string): void {
+  if (!(value >= 0) || !Number.isFinite(value)) {
+    throw new RangeError(`${label} debe ser un número mayor o igual a 0 (recibido: ${value})`)
+  }
+}
+
+/**
+ * Cuánto mover el encuadre (en píxeles, para `camera.setViewOffset`) para que
+ * el centro de la vista quede en el centro de la zona que el panel no tapa.
+ */
+export function viewOffsetForInset(inset: ViewInset): { x: number; y: number } {
+  assertNonNegative(inset.right, 'El ancho tapado')
+  assertNonNegative(inset.bottom, 'El alto tapado')
+  return { x: inset.right / 2, y: inset.bottom / 2 }
+}
+
+/**
+ * Qué tapa un panel: si deja más espacio libre a su izquierda es una columna
+ * a la derecha (escritorio o celular horizontal); si deja más arriba, una hoja inferior.
+ */
+export function panelInset(panel: ScreenRect | null, viewport: Viewport): ViewInset {
+  if (!panel || panel.width <= 0 || panel.height <= 0) return NO_INSET
+  const freeAreaLeft = panel.left * viewport.height
+  const freeAreaAbove = panel.top * viewport.width
+  if (freeAreaLeft >= freeAreaAbove) {
+    return { right: Math.max(0, viewport.width - panel.left), bottom: 0 }
+  }
+  return { right: 0, bottom: Math.max(0, viewport.height - panel.top) }
+}
+
 /** Curva de animación suave: lenta al inicio y al final. Acepta t fuera de 0–1. */
 export function easeInOutCubic(t: number): number {
   const clamped = Math.min(Math.max(t, 0), 1)

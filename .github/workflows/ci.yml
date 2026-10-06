@@ -1,0 +1,56 @@
+# Verificación completa en una VM de GitHub (Ubuntu), no en el equipo local.
+name: CI
+
+on:
+  push:
+    branches: [main, 'feat/**']
+  pull_request:
+  workflow_dispatch:
+
+# Un push nuevo a la misma rama cancela la ejecución anterior.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  verificar:
+    name: Typecheck, pruebas, build y E2E
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Instalar dependencias
+        run: npm ci
+
+      - name: Revisar tipos
+        run: npm run typecheck
+
+      - name: Pruebas unitarias con cobertura
+        run: npm run test:coverage
+
+      - name: Build de producción
+        run: npm run build
+
+      - name: Instalar Chromium para Playwright
+        run: npx playwright install --with-deps chromium
+
+      - name: Pruebas E2E
+        run: npm run test:e2e
+
+      - name: Guardar capturas y trazas de Playwright
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: resultados-playwright
+          path: test-results/
+          if-no-files-found: ignore
+          retention-days: 7

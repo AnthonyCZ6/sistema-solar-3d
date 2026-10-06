@@ -8,6 +8,9 @@
   --acento: #ffcc33;
   --acento-suave: rgba(255, 204, 51, 0.14);
   --hover: rgba(255, 255, 255, 0.08);
+  /* La ficha tiene texto largo: fondo casi opaco para leerla sobre la escena. */
+  --panel-ficha: rgba(10, 14, 26, 0.92);
+  --ancho-ficha: 340px;
   --radio: 10px;
   --margen: 16px;
   color-scheme: dark;
@@ -129,11 +132,146 @@ button:focus-visible {
   flex: none;
 }
 
-.aviso-escala {
+/* Columna derecha: la ficha arriba y el aviso de escala abajo, así nunca se enciman. */
+.lateral {
   position: fixed;
+  top: var(--margen);
   right: var(--margen);
   bottom: var(--margen);
+  width: min(var(--ancho-ficha), calc(100% - 2 * var(--margen)));
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 8px;
+  pointer-events: none;
+}
+
+.ficha {
+  pointer-events: auto;
+  width: 100%;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 14px 16px 16px;
+  background: var(--panel-ficha);
+  border: 1px solid var(--borde);
+  border-radius: var(--radio);
+  backdrop-filter: blur(6px);
+  line-height: 1.45;
+}
+
+.ficha[hidden] {
+  display: none;
+}
+
+.ficha-encabezado {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.ficha h2 {
   margin: 0;
+  font-size: 1.35rem;
+  line-height: 1.2;
+}
+
+.ficha-tipo {
+  margin: 2px 0 0;
+  font-size: 0.9rem;
+  color: var(--acento);
+}
+
+.ficha-cerrar {
+  flex: none;
+  min-width: 44px;
+  min-height: 44px;
+  font: inherit;
+  font-size: 1.5rem;
+  line-height: 1;
+  color: var(--texto);
+  background: transparent;
+  border: 1px solid var(--borde);
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.ficha-cerrar:hover {
+  background: var(--hover);
+}
+
+.ficha-resumen {
+  margin: 12px 0 14px;
+}
+
+.ficha dl {
+  margin: 0;
+  display: grid;
+  gap: 6px;
+}
+
+.ficha dl > div {
+  display: grid;
+  grid-template-columns: minmax(0, 9em) minmax(0, 1fr);
+  gap: 10px;
+}
+
+.ficha dt {
+  font-size: 0.85rem;
+  color: var(--texto-suave);
+}
+
+.ficha dd {
+  margin: 0;
+  font-size: 0.9rem;
+}
+
+.ficha h3 {
+  margin: 16px 0 6px;
+  font-size: 0.95rem;
+}
+
+.ficha ul {
+  margin: 0;
+  padding-left: 1.2em;
+}
+
+.ficha-mas {
+  margin-top: 14px;
+  border-top: 1px solid var(--borde);
+}
+
+.ficha-mas summary {
+  padding: 12px 0;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.ficha-mas summary:focus-visible,
+.ficha a:focus-visible {
+  outline: 2px solid var(--acento);
+  outline-offset: 2px;
+}
+
+.ficha-fuentes {
+  font-size: 0.85rem;
+}
+
+.ficha a {
+  color: var(--acento);
+}
+
+.ficha-consulta {
+  margin: 8px 0 0;
+  font-size: 0.8rem;
+  color: var(--texto-suave);
+}
+
+.aviso-escala {
+  /* Siempre al fondo de la columna derecha, aunque la ficha esté cerrada. */
+  margin: auto 0 0;
+  flex: none;
   max-width: 260px;
   padding: 8px 12px;
   font-size: 0.8rem;
@@ -188,7 +326,8 @@ body[data-estado='error'] .error-3d {
   display: block;
 }
 
-body:is([data-estado='sin-webgl'], [data-estado='error']) :is(#escena, .menu, .aviso-escala, .estado-enfoque) {
+body:is([data-estado='sin-webgl'], [data-estado='error'])
+  :is(#escena, .menu, .ficha, .aviso-escala, .estado-enfoque) {
   display: none;
 }
 
@@ -226,11 +365,40 @@ body:is([data-estado='sin-webgl'], [data-estado='error']) :is(#escena, .menu, .a
     background: var(--panel-solido);
   }
 
+  /* Sin columna: la ficha y el aviso se ubican cada uno por su cuenta. */
+  .lateral {
+    display: contents;
+  }
+
   .aviso-escala {
+    position: fixed;
     top: 76px;
-    bottom: auto;
     left: var(--margen);
-    right: auto;
-    max-width: none;
+    margin: 0;
+    max-width: calc(100% - 2 * var(--margen));
+  }
+
+  /* Hoja inferior justo encima del menú. main.ts mide el menú en --alto-menu. */
+  .ficha {
+    position: fixed;
+    left: var(--margen);
+    right: var(--margen);
+    bottom: calc(var(--margen) + var(--alto-menu, 62px) + 8px);
+    width: auto;
+    max-height: 45dvh;
+  }
+}
+
+/* Celular horizontal: hay poco alto, así que la ficha ocupa la mitad derecha. */
+@media (max-height: 520px) and (min-width: 641px) {
+  .ficha {
+    top: var(--margen);
+    left: auto;
+    width: calc(50% - var(--margen));
+    max-height: none;
+  }
+
+  .aviso-escala {
+    max-width: calc(50% - 3 * var(--margen));
   }
 }

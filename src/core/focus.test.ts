@@ -1,11 +1,14 @@
 import { describe, expect, it } from 'vitest'
 import {
+  NO_INSET,
   OVERVIEW_ELEVATION_DEG,
   easeInOutCubic,
   focusDistance,
   minZoomDistance,
   overviewCameraPosition,
   overviewDistance,
+  panelInset,
+  viewOffsetForInset,
 } from './focus'
 
 const FOV_DEG = 50
@@ -93,5 +96,52 @@ describe('easeInOutCubic', () => {
       expect(value).toBeGreaterThanOrEqual(previous)
       previous = value
     }
+  })
+})
+
+describe('viewOffsetForInset', () => {
+  it('sin nada que tape la escena no desplaza el encuadre', () => {
+    expect(viewOffsetForInset(NO_INSET)).toEqual({ x: 0, y: 0 })
+  })
+
+  it('con un panel a la derecha mueve el centro la mitad de su ancho', () => {
+    expect(viewOffsetForInset({ right: 356, bottom: 0 })).toEqual({ x: 178, y: 0 })
+  })
+
+  it('con una hoja abajo mueve el centro la mitad de su alto', () => {
+    expect(viewOffsetForInset({ right: 0, bottom: 340 })).toEqual({ x: 0, y: 170 })
+  })
+
+  it('rechaza medidas negativas o que no son números', () => {
+    expect(() => viewOffsetForInset({ right: -1, bottom: 0 })).toThrow(RangeError)
+    expect(() => viewOffsetForInset({ right: 0, bottom: Number.NaN })).toThrow(RangeError)
+  })
+})
+
+describe('panelInset', () => {
+  it('sin panel, o con un panel sin tamaño, no tapa nada', () => {
+    const viewport = { width: 1280, height: 800 }
+    expect(panelInset(null, viewport)).toEqual(NO_INSET)
+    expect(panelInset({ left: 0, top: 0, width: 0, height: 0 }, viewport)).toEqual(NO_INSET)
+  })
+
+  it('una columna a la derecha (escritorio) tapa desde su borde izquierdo', () => {
+    const rect = { left: 924, top: 16, width: 340, height: 700 }
+    expect(panelInset(rect, { width: 1280, height: 800 })).toEqual({ right: 356, bottom: 0 })
+  })
+
+  it('una hoja inferior (celular vertical) tapa desde su borde superior', () => {
+    const rect = { left: 16, top: 300, width: 328, height: 250 }
+    expect(panelInset(rect, { width: 360, height: 640 })).toEqual({ right: 0, bottom: 340 })
+  })
+
+  it('un panel en la mitad derecha (celular horizontal) cuenta como columna', () => {
+    const rect = { left: 370, top: 16, width: 354, height: 250 }
+    expect(panelInset(rect, { width: 740, height: 360 })).toEqual({ right: 370, bottom: 0 })
+  })
+
+  it('un panel fuera de la pantalla no da medidas negativas', () => {
+    const rect = { left: 1400, top: 16, width: 340, height: 700 }
+    expect(panelInset(rect, { width: 1280, height: 800 })).toEqual({ right: 0, bottom: 0 })
   })
 })

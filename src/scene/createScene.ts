@@ -14,7 +14,13 @@ import {
 } from 'three'
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
 import { BODIES, PLANETS, SUN, isBodyId, type BodyId } from '../core/bodies'
-import { minZoomDistance, overviewDistance } from '../core/focus'
+import {
+  NO_INSET,
+  minZoomDistance,
+  overviewDistance,
+  viewOffsetForInset,
+  type ViewInset,
+} from '../core/focus'
 import { fixedPixelSpriteScale } from '../core/marker'
 import { initialOrbitalAngle, orbitalAngle, orbitalPosition, spinAngle } from '../core/orbit'
 import { displayExtent, displayOrbitRadius } from '../core/scale'
@@ -55,6 +61,8 @@ interface BodyMotion {
 export interface SolarSystemView {
   focusOn(id: BodyId): void
   showOverview(): void
+  /** Centra la vista en la parte de la pantalla que no tapa un panel (por ejemplo, la ficha). */
+  setViewInset(inset: ViewInset): void
 }
 
 function textureUrl(file: string): string {
@@ -129,10 +137,22 @@ function enablePicking(
   })
 }
 
+/** Desplaza el encuadre para que el centro de la vista quede fuera del panel. */
+function applyViewInset(camera: PerspectiveCamera, inset: ViewInset): void {
+  const { x, y } = viewOffsetForInset(inset)
+  if (x === 0 && y === 0) {
+    camera.clearViewOffset()
+    return
+  }
+  const { innerWidth: width, innerHeight: height } = window
+  camera.setViewOffset(width, height, x, y, width, height)
+}
+
 function createView(
   objects: readonly BodyObject[],
   rig: CameraRig,
   events: SolarSystemEvents,
+  setViewInset: (inset: ViewInset) => void,
 ): SolarSystemView {
   const byId = new Map(objects.map((object) => [object.body.id, object]))
   return {
@@ -146,6 +166,7 @@ function createView(
       rig.showOverview()
       events.onFocusChange(null)
     },
+    setViewInset,
   }
 }
 
@@ -210,7 +231,11 @@ export function createSolarSystem(
     reducedMotion: window.matchMedia('(prefers-reduced-motion: reduce)').matches,
   })
 
-  const view = createView(objects, rig, events)
+  let viewInset = NO_INSET
+  const view = createView(objects, rig, events, (inset) => {
+    viewInset = inset
+    applyViewInset(camera, viewInset)
+  })
   enablePicking(canvas, camera, objects.flatMap((object) => object.pickables), (id) => view.focusOn(id))
 
   const fitToViewport = (): void => {
@@ -219,6 +244,8 @@ export function createSolarSystem(
     const distance = overviewDistance(outerRadius, camera.aspect, FOV_DEG)
     camera.far = distance * FAR_PLANE_FACTOR
     camera.updateProjectionMatrix()
+    // El desplazamiento se mide en píxeles: hay que recalcularlo con el tamaño nuevo.
+    applyViewInset(camera, viewInset)
     rig.setOverviewDistance(distance)
     const markerScale = fixedPixelSpriteScale(MARKER_SIZE_PX, window.innerHeight, FOV_DEG)
     for (const { marker } of objects) marker?.scale.setScalar(markerScale)
